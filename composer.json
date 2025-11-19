@@ -83,7 +83,10 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
-        ]
+        ],
+
+        "start": "serve -s build",
+        "build": "react-scripts build"
     },
     "conflict": {
         "symfony/symfony": "*"
