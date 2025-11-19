@@ -1,0 +1,108 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content %}
+    <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+
+        <h1 class="text-center mb-5" style="font-size: 2.5rem; font-weight: 700;">📊 Pula Market Admin Dashboard</h1>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; margin-bottom: 50px;">
+            {% set stats = [
+                {'label': 'Features', 'count': featureCount ?: 0, 'icon': '⭐'},
+                {'label': 'Sectors', 'count': sectorCount ?: 0, 'icon': '🏭'},
+                {'label': 'Testimonials', 'count': testimonialCount ?: 0, 'icon': '💬'},
+                {'label': 'Users', 'count': userCount ?: 0, 'icon': '👤'}
+            ] %}
+            {% for stat in stats %}
+                <div class="card stat-card" style="flex:1 1 220px; max-width:300px; background:#f8f9fa; border-radius:12px; padding:25px; text-align:center; box-shadow:0 3px 8px rgba(0,0,0,0.1);">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">{{ stat.icon }}</div>
+                    <h3 style="font-size:2rem; margin-bottom:10px;">{{ stat.count }}</h3>
+                    <p style="font-weight:500; color:#555;">{{ stat.label }}</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        <hr style="margin-bottom: 40px;">
+
+        <!-- Charts Section -->
+        <div class="charts-grid" style="display:flex; flex-direction:column; gap:50px;">
+            <div>
+                <h3 class="mb-3" style="font-size:1.75rem;">📈 Monthly User Registrations</h3>
+                <canvas id="userChart" height="120"></canvas>
+            </div>
+
+            <div>
+                <h3 class="mb-3" style="font-size:1.75rem;">⭐ Features Added Monthly</h3>
+                <canvas id="featureChart" height="120"></canvas>
+            </div>
+
+            <div>
+                <h3 class="mb-3" style="font-size:1.75rem;">🧑 Users by Type</h3>
+                <canvas id="userTypeChart" height="120"></canvas>
+            </div>
+
+            <div>
+                <h3 class="mb-3" style="font-size:1.75rem;">🏭 Features by Sector</h3>
+                <canvas id="featureSectorChart" height="120"></canvas>
+            </div>
+
+            <div>
+                <h3 class="mb-3" style="font-size:1.75rem;">💬 Testimonials per Month</h3>
+                <canvas id="testimonialChart" height="120"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Monthly Users
+        const userLabels = {{ monthlyUserStats|map(v => v.month)|json_encode|raw }} || ['No Data'];
+        const userData = {{ monthlyUserStats|map(v => v.total)|json_encode|raw }} || [0];
+
+        new Chart(document.getElementById('userChart').getContext('2d'), {
+            type: 'line',
+            data: { labels: userLabels, datasets: [{ label:'New Users', data:userData, borderColor:'#36A2EB', backgroundColor:'rgba(54,162,235,0.2)', fill:true, tension:0.3 }] },
+            options: { responsive:true, plugins:{ legend:{ display:true } }, scales:{ y:{ beginAtZero:true } } }
+        });
+
+        // Monthly Features
+        const featureLabels = {{ monthlyFeatureStats|map(v => v.month)|json_encode|raw }} || ['No Data'];
+        const featureData = {{ monthlyFeatureStats|map(v => v.total)|json_encode|raw }} || [0];
+
+        new Chart(document.getElementById('featureChart').getContext('2d'), {
+            type: 'bar',
+            data: { labels: featureLabels, datasets: [{ label:'Features Added', data:featureData, backgroundColor:'#FFCE56' }] },
+            options: { responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } }
+        });
+
+        // Users by Type
+        const userTypeLabels = {{ userTypeStats|map(v => v.user_type)|json_encode|raw }} || ['No Data'];
+        const userTypeData = {{ userTypeStats|map(v => v.total)|json_encode|raw }} || [0];
+
+        new Chart(document.getElementById('userTypeChart').getContext('2d'), {
+            type: 'doughnut',
+            data: { labels: userTypeLabels, datasets:[{ data:userTypeData, backgroundColor:['#36A2EB','#FF6384'] }] },
+            options:{ responsive:true, plugins:{ legend:{ position:'bottom' } } }
+        });
+
+        // Features by Sector
+        const featureSectorLabels = {{ featureSectorStats|map(v => v.sector)|json_encode|raw }} || ['No Data'];
+        const featureSectorData = {{ featureSectorStats|map(v => v.total)|json_encode|raw }} || [0];
+
+        new Chart(document.getElementById('featureSectorChart').getContext('2d'), {
+            type: 'bar',
+            data: { labels: featureSectorLabels, datasets:[{ label:'Features per Sector', data:featureSectorData, backgroundColor:'#FF9F40' }] },
+            options:{ responsive:true, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } }
+        });
+
+        // Testimonials per Month
+        const testimonialLabels = {{ monthlyTestimonialStats|map(v => v.month)|json_encode|raw }} || ['No Data'];
+        const testimonialData = {{ monthlyTestimonialStats|map(v => v.total)|json_encode|raw }} || [0];
+
+        new Chart(document.getElementById('testimonialChart').getContext('2d'), {
+            type: 'line',
+            data: { labels:testimonialLabels, datasets:[{ label:'Testimonials', data:testimonialData, borderColor:'#FF6384', backgroundColor:'rgba(255,99,132,0.2)', fill:true, tension:0.3 }] },
+            options:{ responsive:true, plugins:{ legend:{ display:true } }, scales:{ y:{ beginAtZero:true } } }
+        });
+    </script>
+{% endblock %}
